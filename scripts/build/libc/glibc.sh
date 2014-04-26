@@ -375,6 +375,21 @@ do_libc_backend_once() {
     CT_LDFLAGS_FOR_BUILD+=" ${CT_EXTRA_LDFLAGS_FOR_BUILD}"
     extra_make_args+=( "BUILD_CFLAGS=${CT_CFLAGS_FOR_BUILD}" "BUILD_LDFLAGS=${CT_LDFLAGS_FOR_BUILD}" )
 
+    case "$CT_BUILD" in
+        *mingw*)
+            # When installing headers on MinGW-w64, sunrpc needs gettext for building
+            # cross-rpcgen.
+            # used to parse the output of the C-preprocessor.
+            extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
+            extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" )
+            ;;
+        *darwin*)
+            # .. and the same goes for Darwin.
+            extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
+            extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -lintl" )
+            ;;
+    esac
+
     if [ "${libc_headers}" = "y" ]; then
         CT_DoLog EXTRA "Installing C library headers"
 

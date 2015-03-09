@@ -5,6 +5,7 @@ config GDB_NATIVE
     prompt "Native gdb"
     depends on ! BARE_METAL
     depends on ! BACKEND
+    select EXPAT_TARGET
     help
       Build and install a native gdb for the target, to run on the target.
 
@@ -13,6 +14,7 @@ if GDB_NATIVE
 config GDB_NATIVE_STATIC
     bool
     prompt "Build a static native gdb"
+    select EXPAT_TARGET_STATIC
     help
       In case you have trouble with dynamic loading of shared libraries,
       you will find that a static gdb comes in handy.

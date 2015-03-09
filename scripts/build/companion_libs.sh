@@ -37,3 +37,20 @@ do_companion_libs_for_host() {
     done
 }
 
+# Build the static companion libs facilities for target
+do_companion_libs_for_target() {
+    for f in ${CT_COMP_LIBS_FACILITY_LIST}; do
+        if [ "$(type -t do_${f}_for_target)" = "function" ]; then
+          do_${f}_for_target
+        fi
+    done
+}
+
+# Build the shared companion libs facilities for target
+do_companion_libs_for_static_target() {
+    for f in ${CT_COMP_LIBS_FACILITY_LIST}; do
+        if [ "$(type -t do_${f}_for_static_target)" = "function" ]; then
+          do_${f}_for_static_target
+        fi
+    done
+}

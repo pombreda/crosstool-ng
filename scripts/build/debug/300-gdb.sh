@@ -6,13 +6,9 @@
 # config options for this.
 CT_DEBUG_GDB_NCURSES_VERSION="5.9"
 
-# Ditto for the expat library
-CT_DEBUG_GDB_EXPAT_VERSION="2.1.0"
-
 do_debug_gdb_parts() {
     need_gdb_src=
     need_ncurses_src=
-    need_expat_src=
 
     if [ "${CT_GDB_CROSS}" = y ]; then
         need_gdb_src=y
@@ -28,7 +24,6 @@ do_debug_gdb_parts() {
         if [ "${CT_MINGW32}" != "y" ]; then
             need_ncurses_src=y
         fi
-        need_expat_src=y
     fi
 }
 
@@ -70,11 +65,6 @@ do_debug_gdb_get() {
                    {http,ftp,https}://ftp.gnu.org/pub/gnu/ncurses     \
                    ftp://invisible-island.net/ncurses
     fi
-
-    if [ "${need_expat_src}" = "y" ]; then
-        CT_GetFile "expat-${CT_DEBUG_GDB_EXPAT_VERSION}" .tar.gz    \
-                   http://downloads.sourceforge.net/project/expat/expat/${CT_DEBUG_GDB_EXPAT_VERSION}
-    fi
 }
 
 do_debug_gdb_extract() {
@@ -94,11 +84,6 @@ do_debug_gdb_extract() {
         CT_Extract "ncurses-${CT_DEBUG_GDB_NCURSES_VERSION}"
         CT_DoExecLog ALL chmod -R u+w "${CT_SRC_DIR}/ncurses-${CT_DEBUG_GDB_NCURSES_VERSION}"
         CT_Patch "ncurses" "${CT_DEBUG_GDB_NCURSES_VERSION}"
-    fi
-
-    if [ "${need_expat_src}" = "y" ]; then
-        CT_Extract "expat-${CT_DEBUG_GDB_EXPAT_VERSION}"
-        CT_Patch "expat" "${CT_DEBUG_GDB_EXPAT_VERSION}"
     fi
 }
 
@@ -132,6 +117,7 @@ do_debug_gdb_build() {
         cross_extra_config=("${extra_config[@]}")
         cross_extra_config+=("--enable-expat")
         cross_extra_config+=("--with-expat=yes")
+        cross_extra_config+=("--with-libexpat-prefix=${CT_BUILDTOOLS_PREFIX_DIR}")
         case "${CT_THREADS}" in
             none)   cross_extra_config+=("--disable-threads");;
             *)      cross_extra_config+=("--enable-threads");;
@@ -204,7 +190,9 @@ do_debug_gdb_build() {
 
         CT_EndStep
     fi
+}
 
+do_debug_gdb_target() {
     if [ "${CT_GDB_NATIVE}" = "y" ]; then
         local -a native_extra_config
         local -a ncurses_opt
@@ -217,7 +205,7 @@ do_debug_gdb_build() {
         # GDB on Mingw depends on PDcurses, not ncurses
         if [ "${CT_MINGW32}" != "y" ]; then
             CT_DoLog EXTRA "Building static target ncurses"
-
+    
             CT_mkdir_pushd "${CT_BUILD_DIR}/build-ncurses-target-${CT_TARGET}"
             do_gdb_ncurses_backend host="${CT_TARGET}"                      \
                                    prefix="${CT_BUILD_DIR}/static-target"   \
@@ -229,7 +217,7 @@ do_debug_gdb_build() {
             gdb_native_CFLAGS+=("-I${CT_BUILD_DIR}/static-target/include")
             gdb_native_CFLAGS+=("-L${CT_BUILD_DIR}/static-target/lib")
         fi # need_ncurses_src
-
+    
         # Build libexpat
         CT_DoLog EXTRA "Building static target expat"
         CT_mkdir_pushd "${CT_BUILD_DIR}/build-expat-target-${CT_TARGET}"
@@ -239,7 +227,8 @@ do_debug_gdb_build() {
                              ldflags=""
         CT_Popd
         native_extra_config+=("--with-expat")
-        native_extra_config+=("--with-libexpat-prefix=${CT_BUILD_DIR}/static-target")
+#        native_extra_config+=("--with-libexpat-prefix=${CT_BUILD_DIR}/static-target")
+        native_extra_config+=("--with-libexpat-prefix=${CT_SYSROOT_DIR}")
 
         CT_DoLog EXTRA "Configuring native gdb"
 

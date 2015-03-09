@@ -75,6 +75,13 @@ config MPC
     select MPFR
     select COMPLIBS
 
+config EXPAT
+    bool
+    select COMPLIBS
+
+config EXPAT_TARGET
+    bool
+
 config LIBELF
     bool
     select COMPLIBS
@@ -99,6 +106,10 @@ source "config/companion_libs/cloog.in"
 endif
 if MPC
 source "config/companion_libs/mpc.in"
+endif
+if EXPAT || EXPAT_TARGET
+comment "expat version needed to build for target"
+source "config/companion_libs/expat.in"
 endif
 if LIBELF || LIBELF_TARGET
 comment "libelf version needed to build for target"

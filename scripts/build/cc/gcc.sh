@@ -547,6 +547,11 @@ do_cc_for_build() {
         build_final_backend=do_cc_backend
     fi
 
+    # Perhaps it's better to just do this globally?
+    if [ ! "${CT_BUILD/mingw/}" = "${CT_BUILD}" -a "${CT_DLFCN_WIN32}" = "y" ]; then
+        build_final_opts+=( "cflags=-I${CT_BUILDTOOLS_PREFIX_DIR}/include" )
+    fi
+
     CT_DoStep INFO "Installing final compiler for build"
     CT_mkdir_pushd "${CT_BUILD_DIR}/build-cc-final-build-${CT_BUILD}"
 
@@ -582,6 +587,11 @@ do_cc_for_host() {
         final_backend=do_cc_core_backend
     else
         final_backend=do_cc_backend
+    fi
+
+    # Perhaps it's better to just do this globally?
+    if [ ! "${CT_HOST/mingw/}" = "${CT_HOST}" -a "${CT_DLFCN_WIN32}" = "y" ]; then
+        build_final_opts+=( "cflags=-I${CT_HOST_COMPLIBS_DIR}/include" )
     fi
 
     CT_DoStep INFO "Installing final compiler"

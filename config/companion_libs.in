@@ -22,6 +22,11 @@ config PPL_NEEDED
     select PPL
     select COMPLIBS_NEEDED
 
+config DLFCN_WIN32_NEEDED
+    bool
+    select DLFCN_WIN32
+    select COMPLIBS_NEEDED
+
 config ISL_NEEDED
     bool
     select ISL
@@ -59,6 +64,10 @@ config PPL
     select GMP
     select COMPLIBS
 
+config DLFCN_WIN32
+    bool
+    select COMPLIBS
+
 config ISL
     bool
     select GMP
@@ -90,6 +99,9 @@ source "config/companion_libs/mpfr.in"
 endif
 if PPL
 source "config/companion_libs/ppl.in"
+endif
+if DLFCN_WIN32
+source "config/companion_libs/dlfcn_win32.in"
 endif
 if ISL
 source "config/companion_libs/isl.in"
